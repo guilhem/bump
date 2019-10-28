@@ -19,3 +19,5 @@ jobs:
 
     - name: Go-Linty
       uses: ArangoGutierrez/GoLinty-Action@go-1.12-alpine
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
