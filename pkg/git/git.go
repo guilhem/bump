@@ -32,10 +32,7 @@ func New() (*Git, error) {
 
 func IsGit() bool {
 	_, err := New()
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func (g *Git) Revision(longSha bool) (string, error) {
