@@ -38,7 +38,9 @@ var majorCmd = &cobra.Command{
 			if err != nil {
 				log.Fatalf("not a git repository")
 			}
-			g.CreateTag(version.String())
+			if err := g.CreateTag(version.String()); err != nil {
+				log.Fatalf("fail to create tag: %s", err)
+			}
 		}
 	},
 }
