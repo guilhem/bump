@@ -17,7 +17,8 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
-    - name: Go-Linty
-      uses: ArangoGutierrez/GoLinty-Action@go-1.12-alpine
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run golangci-lint with reviewdog
+      uses: reviewdog/action-golangci-lint@v1
+      with:
+        github_token: ${{ secrets.github_token }}
+
