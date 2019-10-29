@@ -3,7 +3,7 @@ module github.com/guilhem/bump
 go 1.13
 
 require (
-	github.com/coreos/go-semver v0.2.0
+	github.com/Masterminds/semver v1.5.0
 	github.com/manifoldco/promptui v0.3.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nicksnyder/go-i18n v1.10.1 // indirect

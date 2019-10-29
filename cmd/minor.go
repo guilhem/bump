@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/guilhem/bump/pkg/bump"
 	"github.com/guilhem/bump/pkg/git"
+	"github.com/guilhem/bump/pkg/semver"
 	"github.com/spf13/cobra"
 )
 
@@ -30,15 +30,15 @@ var minorCmd = &cobra.Command{
 	Short: "Bump minor",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		version := bump.New(currentTag)
-		version.BumpMinor()
-		fmt.Println(version.String())
+		version := semver.New(currentTag)
+		vInc := version.IncMinor()
+		fmt.Println(vInc.Original())
 		if !dryRun {
 			g, err := git.New()
 			if err != nil {
 				log.Fatalf("not a git repository")
 			}
-			if err := g.CreateTag(version.String()); err != nil {
+			if err := g.CreateTag(vInc.Original()); err != nil {
 				log.Fatalf("fail to create tag: %s", err)
 			}
 		}
