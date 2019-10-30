@@ -16,8 +16,8 @@ jobs:
           go-version: 1.13
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Install snap
-        run: sudo apt install snapd
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
       - name: Snapcraft login
         run: snapcraft login --with ${{ secrets.SNAPCRAFT_TOKEN }}
       - name: Run GoReleaser
