@@ -23,9 +23,9 @@ snapcrafts:
   - summary: Command-line to bump version in a git repository
     description: |
       With bump you can bump version following semver.
-      bump major
-      bump minor
-      bump patch
+      - bump major
+      - bump minor
+      - bump patch
 
       You can use it with or without "v" prefix.
     grade: devel
@@ -34,3 +34,12 @@ snapcrafts:
     confinement: strict
     plugs:
       home:
+brews:
+  - github:
+      owner: guilhem
+      name: homebrew-tap
+    commit_author:
+      name: goreleaserbot
+      email: goreleaser@barpilot.io
+    homepage: "https://github.com/guilhem/bump"
+    description: "Command-line to bump version in a git repository."
