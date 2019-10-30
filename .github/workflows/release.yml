@@ -18,6 +18,8 @@ jobs:
         uses: actions/checkout@v1
       - name: Install snapcraft
         run: sudo snap install snapcraft --classic
+      - name: Add snapcraft to PATH
+        run: sudo ln -fs /snap/bin/snapcraft /usr/local/bin/snapcraft
       - name: Snapcraft login
         run: snapcraft login --with ${{ secrets.SNAPCRAFT_TOKEN }}
       - name: Run GoReleaser
