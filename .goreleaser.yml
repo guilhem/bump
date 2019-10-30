@@ -19,3 +19,22 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+snapcrafts:
+  - summary: Command-line to bump version in a git repository
+    description: |
+      With bump you can bump version following semver.
+      bump major
+      bump minor
+      bump patch
+
+      You can use it with or without "v" prefix.
+    grade: devel
+    license: Apache-2.0
+    base: core18
+    confinement: strict
+    plugs:
+      home:
+      personal-files:
+        read:
+        - $HOME/.gitconfig
+        - $HOME/.config/git/config
