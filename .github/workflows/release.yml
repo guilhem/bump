@@ -16,6 +16,8 @@ jobs:
           go-version: 1.13
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Install snap
+        run: sudo apt install snapd
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v1
         with:
