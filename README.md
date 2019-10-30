@@ -4,7 +4,17 @@
 
 Command-line to bump version in a git repository
 
+## Install
+
+### Snap
+
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/bump)
+
+### Homebrew
+
+```
+brew install guilhem/homebrew-tap/bump
+```
 
 ## Usage
 
