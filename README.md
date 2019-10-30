@@ -6,17 +6,47 @@ Command-line to bump version in a git repository
 
 ## Install
 
-### Snap
+### [Snap](https://snapcraft.io/)
 
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/bump)
 
-### Homebrew
-
+```sh
+$ snap install bump
 ```
-brew install guilhem/homebrew-tap/bump
+
+### [Homebrew](https://brew.sh/)
+
+```sh
+$ brew install guilhem/homebrew-tap/bump
 ```
 
 ## Usage
+
+### Help
+
+```sh
+$ bump --help
+Bump version
+
+Usage:
+  bump [command]
+
+Available Commands:
+  help        Help about any command
+  major       Bump major version
+  minor       Bump minor
+  patch       Bump patch
+
+Flags:
+      --allow-dirty     allow usage of bump on dirty git
+      --config string   config file (default is $HOME/.bump.yaml)
+      --dry-run         Don't touch git repository
+  -h, --help            help for bump
+      --latest-tag      use latest tag, prompt tags if false (default true)
+  -t, --toggle          Help message for toggle
+
+Use "bump [command] --help" for more information about a command.
+```
 
 ### Major
 
@@ -32,12 +62,12 @@ $ git tag
 ### Minor
 
 ```sh
-$ git tag
-1.1.1
+$ git tag 
+v1.1.1
 $ bump minor
 $ git tag
-1.1.1
-1.2.0
+v1.1.1
+v1.2.0
 ```
 
 ### Patch
