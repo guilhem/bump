@@ -39,7 +39,6 @@ Available Commands:
 
 Flags:
       --allow-dirty     allow usage of bump on dirty git
-      --config string   config file (default is $HOME/.bump.yaml)
       --dry-run         Don't touch git repository
   -h, --help            help for bump
       --latest-tag      use latest tag, prompt tags if false (default true)
