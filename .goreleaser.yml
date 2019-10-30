@@ -34,7 +34,3 @@ snapcrafts:
     confinement: strict
     plugs:
       home:
-      personal-files:
-        read:
-        - $HOME/.gitconfig
-        - $HOME/.config/git/config
