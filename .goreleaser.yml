@@ -28,7 +28,7 @@ snapcrafts:
       - bump patch
 
       You can use it with or without "v" prefix.
-    grade: devel
+    grade: stable
     license: Apache-2.0
     base: core18
     confinement: strict
