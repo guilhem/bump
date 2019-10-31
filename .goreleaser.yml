@@ -29,6 +29,7 @@ snapcrafts:
 
       You can use it with or without "v" prefix.
     grade: stable
+    publish: true
     license: Apache-2.0
     base: core18
     confinement: strict
