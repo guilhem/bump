@@ -20,6 +20,12 @@ $ snap install bump
 $ brew install guilhem/homebrew-tap/bump
 ```
 
+### [Go get](https://golang.org/pkg/cmd/go/internal/get/)
+
+```sh
+$ go get github.com/guilhem/bump
+```
+
 ## Usage
 
 ### Help
