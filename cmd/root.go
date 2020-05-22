@@ -30,6 +30,7 @@ var allowDirty bool
 var currentTag string
 var latestTag bool
 var dryRun bool
+var onlyAncestors bool
 
 var rootCmd = &cobra.Command{
 	Use:   "bump",
@@ -52,6 +53,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&allowDirty, "allow-dirty", false, "allow usage of bump on dirty git")
 	rootCmd.PersistentFlags().BoolVar(&latestTag, "latest-tag", true, "use latest tag, prompt tags if false")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Don't touch git repository")
+	rootCmd.PersistentFlags().BoolVar(&onlyAncestors, "only-ancestors", true, "Ignore tags which are not ancestors of HEAD")
 
 }
 
@@ -68,7 +70,7 @@ func preRun(cmd *cobra.Command, args []string) {
 	}
 
 	if !latestTag {
-		tags, err := g.Tags()
+		tags, err := g.Tags(onlyAncestors)
 		if err != nil {
 			log.Fatalf("error tags: %s", err)
 		}
@@ -85,7 +87,7 @@ func preRun(cmd *cobra.Command, args []string) {
 		}
 		fmt.Printf("You choose %q\n", currentTag)
 	} else {
-		currentTag, err = g.LatestTag()
+		currentTag, err = g.LatestTag(onlyAncestors)
 		if err != nil {
 			log.Fatalf("Can't get latest tag: %s", err)
 		}
