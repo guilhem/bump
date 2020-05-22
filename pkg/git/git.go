@@ -102,22 +102,44 @@ func (g *Git) CurrentCommit() (string, error) {
 	return headSha, nil
 }
 
-func (g *Git) Tags() ([]string, error) {
-	tags, _, err := g.tags()
+func (g *Git) currentCommitObject() (*object.Commit, error) {
+	var headCommit *object.Commit
+
+	headRef, err := g.repository.Head()
+	if err != nil {
+		return headCommit, err
+	}
+	headHash := headRef.Hash()
+	headCommit, err = g.repository.CommitObject(headHash)
+
+	if err != nil {
+		return headCommit, err
+	}
+
+	return headCommit, nil
+}
+
+func (g *Git) Tags(onlyAncestors bool) ([]string, error) {
+	tags, _, err := g.tags(onlyAncestors)
 	return tags, err
 }
 
-func (g *Git) LatestTag() (string, error) {
-	_, tag, err := g.tags()
+func (g *Git) LatestTag(onlyAncestors bool) (string, error) {
+	_, tag, err := g.tags(onlyAncestors)
 	return tag, err
 }
 
-func (g *Git) tags() ([]string, string, error) {
+func (g *Git) tags(onlyAncestors bool) ([]string, string, error) {
 	var latestTagName string
 	var tags []string
 	var latestTagCommit *object.Commit
 
 	tagRefs, err := g.repository.Tags()
+	if err != nil {
+		return tags, latestTagName, err
+	}
+
+	headCommit, err := g.currentCommitObject()
 	if err != nil {
 		return tags, latestTagName, err
 	}
@@ -133,16 +155,30 @@ func (g *Git) tags() ([]string, string, error) {
 		if err != nil {
 			return err
 		}
-		tags = append(tags, tagRef.Name().Short())
 
-		if latestTagCommit == nil {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
+		useTag := true
+
+		if onlyAncestors {
+			isAncestor, err := commit.IsAncestor(headCommit)
+			if err != nil {
+				return err
+			}
+			if !isAncestor {
+				useTag = false
+			}
 		}
+		if useTag {
+			tags = append(tags, tagRef.Name().Short())
 
-		if commit.Committer.When.After(latestTagCommit.Committer.When) {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
+			if latestTagCommit == nil {
+				latestTagCommit = commit
+				latestTagName = tagRef.Name().Short()
+			}
+
+			if commit.Committer.When.After(latestTagCommit.Committer.When) {
+				latestTagCommit = commit
+				latestTagName = tagRef.Name().Short()
+			}
 		}
 
 		return nil
