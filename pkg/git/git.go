@@ -103,55 +103,66 @@ func (g *Git) CurrentCommit() (string, error) {
 }
 
 func (g *Git) Tags() ([]string, error) {
-	tags, _, err := g.tags()
-	return tags, err
+	return g.tags()
 }
 
-func (g *Git) LatestTag() (string, error) {
-	_, tag, err := g.tags()
-	return tag, err
-}
+// func (g *Git) LatestTag() (string, error) {
+// 	_, tag, err := g.tags()
+// 	return tag, err
+// }
 
-func (g *Git) tags() ([]string, string, error) {
-	var latestTagName string
+func (g *Git) tags() ([]string, error) {
 	var tags []string
-	var latestTagCommit *object.Commit
+	tagsHash := make(map[plumbing.Hash][]string)
 
 	tagRefs, err := g.repository.Tags()
 	if err != nil {
-		return tags, latestTagName, err
+		return tags, err
 	}
 
 	err = tagRefs.ForEach(func(tagRef *plumbing.Reference) error {
-		revision := plumbing.Revision(tagRef.Name().String())
-		tagCommitHash, err := g.repository.ResolveRevision(revision)
-		if err != nil {
-			return err
-		}
+		tagsHash[tagRef.Hash()] = append(tagsHash[tagRef.Hash()], tagRef.Name().Short())
 
-		commit, err := g.repository.CommitObject(*tagCommitHash)
-		if err != nil {
-			return err
-		}
-		tags = append(tags, tagRef.Name().Short())
+		// revision := plumbing.Revision(tagRef.Name().String())
+		// tagCommitHash, err := g.repository.ResolveRevision(revision)
+		// if err != nil {
+		// 	return err
+		// }
 
-		if latestTagCommit == nil {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
-		}
+		// commit, err := g.repository.CommitObject(*tagCommitHash)
+		// if err != nil {
+		// 	return err
+		// }
+		// tags = append(tags, tagRef.Name().Short())
 
-		if commit.Committer.When.After(latestTagCommit.Committer.When) {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
-		}
+		// if latestTagCommit == nil {
+		// 	latestTagCommit = commit
+		// 	latestTagName = tagRef.Name().Short()
+		// }
+
+		// if commit.Committer.When.After(latestTagCommit.Committer.When) {
+		// 	latestTagCommit = commit
+		// 	latestTagName = tagRef.Name().Short()
+		// }
 
 		return nil
 	})
 	if err != nil {
-		return tags, latestTagName, err
+		return tags, err
 	}
 
-	return tags, latestTagName, nil
+	head, _ := g.repository.Head()
+	commitHead, err := g.repository.CommitObject(head.Hash())
+	iter := object.NewCommitIterCTime(commitHead, make(map[plumbing.Hash]bool), []plumbing.Hash{})
+	err = iter.ForEach(func(c *object.Commit) error {
+		tag, ok := tagsHash[c.ID()]
+		if ok {
+			tags = append(tags, tag...)
+		}
+		return nil
+	})
+
+	return tags, nil
 }
 
 func (g *Git) CreateTag(version string) error {

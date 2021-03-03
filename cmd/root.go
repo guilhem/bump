@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/guilhem/bump/pkg/git"
+	"github.com/guilhem/bump/pkg/semver"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -67,8 +68,9 @@ func preRun(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	tags, err := g.Tags()
+
 	if !latestTag {
-		tags, err := g.Tags()
 		if err != nil {
 			log.Fatalf("error tags: %s", err)
 		}
@@ -85,7 +87,7 @@ func preRun(cmd *cobra.Command, args []string) {
 		}
 		fmt.Printf("You choose %q\n", currentTag)
 	} else {
-		currentTag, err = g.LatestTag()
+		currentTag, err = semver.Latest(tags)
 		if err != nil {
 			log.Fatalf("Can't get latest tag: %s", err)
 		}
