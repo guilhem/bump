@@ -18,5 +18,5 @@ package main
 import "github.com/guilhem/bump/cmd"
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }

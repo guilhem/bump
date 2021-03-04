@@ -16,20 +16,21 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/guilhem/bump/pkg/git"
+	"github.com/guilhem/bump/pkg/semver"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
-var cfgFile string
-var allowDirty bool
-var currentTag string
-var latestTag bool
-var dryRun bool
+var (
+	allowDirty bool
+	currentTag string
+	latestTag  bool
+	dryRun     bool
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "bump",
@@ -41,7 +42,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }
@@ -52,7 +53,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&allowDirty, "allow-dirty", false, "allow usage of bump on dirty git")
 	rootCmd.PersistentFlags().BoolVar(&latestTag, "latest-tag", true, "use latest tag, prompt tags if false")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Don't touch git repository")
-
 }
 
 func preRun(cmd *cobra.Command, args []string) {
@@ -67,11 +67,13 @@ func preRun(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	tags, err := g.Tags()
+
 	if !latestTag {
-		tags, err := g.Tags()
 		if err != nil {
 			log.Fatalf("error tags: %s", err)
 		}
+
 		prompt := promptui.Select{
 			Label: "Select Previous tag",
 			Items: tags,
@@ -80,12 +82,14 @@ func preRun(cmd *cobra.Command, args []string) {
 		_, currentTag, err = prompt.Run()
 
 		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
+			log.Printf("Prompt failed %v\n", err)
+
 			return
 		}
-		fmt.Printf("You choose %q\n", currentTag)
+
+		log.Printf("You choose %q\n", currentTag)
 	} else {
-		currentTag, err = g.LatestTag()
+		currentTag, err = semver.Latest(tags)
 		if err != nil {
 			log.Fatalf("Can't get latest tag: %s", err)
 		}

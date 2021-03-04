@@ -1,11 +1,12 @@
 package git
 
 import (
+	"fmt"
 	"os"
 
-	git "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type Git struct {
@@ -15,23 +16,29 @@ type Git struct {
 func New() (*Git, error) {
 	dir, err := os.Getwd()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can't get current directory: %w", err)
 	}
 
-	opt := &git.PlainOpenOptions{DetectDotGit: true}
+	opt := &git.PlainOpenOptions{
+		DetectDotGit:          true,
+		EnableDotGitCommonDir: false,
+	}
+
 	repo, err := git.PlainOpenWithOptions(dir, opt)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can't open git: %w", err)
 	}
 
 	git := &Git{
 		repository: *repo,
 	}
+
 	return git, nil
 }
 
 func IsGit() bool {
 	_, err := New()
+
 	return err == nil
 }
 
@@ -40,6 +47,7 @@ func (g *Git) Revision(longSha bool) (string, error) {
 	if longSha || err != nil {
 		return h, err
 	}
+
 	return h[:7], err
 }
 
@@ -55,9 +63,6 @@ func (g *Git) IsDirty() bool {
 	}
 
 	return !status.IsClean()
-
-	// res, _ := oneliner("git", "status", "--porcelain")
-	// return len(res) > 0
 }
 
 // Thanks King'ori Maina @itskingori
@@ -68,12 +73,12 @@ func (g *Git) Branches() ([]string, error) {
 
 	branchRefs, err := g.repository.Branches()
 	if err != nil {
-		return currentBranchesNames, err
+		return currentBranchesNames, fmt.Errorf("can't get branches: %w", err)
 	}
 
 	headRef, err := g.repository.Head()
 	if err != nil {
-		return currentBranchesNames, err
+		return currentBranchesNames, fmt.Errorf("can't get HEAD object: %w", err)
 	}
 
 	err = branchRefs.ForEach(func(branchRef *plumbing.Reference) error {
@@ -86,7 +91,7 @@ func (g *Git) Branches() ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return currentBranchesNames, err
+		return currentBranchesNames, fmt.Errorf("can't parse branches: %w", err)
 	}
 
 	return currentBranchesNames, nil
@@ -95,72 +100,71 @@ func (g *Git) Branches() ([]string, error) {
 func (g *Git) CurrentCommit() (string, error) {
 	headRef, err := g.repository.Head()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("can't get HEAD object: %w", err)
 	}
-	headSha := headRef.Hash().String()
 
-	return headSha, nil
+	return headRef.Hash().String(), nil
 }
 
 func (g *Git) Tags() ([]string, error) {
-	tags, _, err := g.tags()
-	return tags, err
+	return g.tags()
 }
 
-func (g *Git) LatestTag() (string, error) {
-	_, tag, err := g.tags()
-	return tag, err
-}
-
-func (g *Git) tags() ([]string, string, error) {
-	var latestTagName string
+func (g *Git) tags() ([]string, error) {
 	var tags []string
-	var latestTagCommit *object.Commit
+
+	tagsHash := make(map[plumbing.Hash][]string)
 
 	tagRefs, err := g.repository.Tags()
 	if err != nil {
-		return tags, latestTagName, err
+		return tags, fmt.Errorf("can't get tags: %w", err)
 	}
 
 	err = tagRefs.ForEach(func(tagRef *plumbing.Reference) error {
-		revision := plumbing.Revision(tagRef.Name().String())
-		tagCommitHash, err := g.repository.ResolveRevision(revision)
-		if err != nil {
-			return err
-		}
-
-		commit, err := g.repository.CommitObject(*tagCommitHash)
-		if err != nil {
-			return err
-		}
-		tags = append(tags, tagRef.Name().Short())
-
-		if latestTagCommit == nil {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
-		}
-
-		if commit.Committer.When.After(latestTagCommit.Committer.When) {
-			latestTagCommit = commit
-			latestTagName = tagRef.Name().Short()
-		}
+		tagsHash[tagRef.Hash()] = append(tagsHash[tagRef.Hash()], tagRef.Name().Short())
 
 		return nil
 	})
 	if err != nil {
-		return tags, latestTagName, err
+		return tags, fmt.Errorf("can't parse tags: %w", err)
 	}
 
-	return tags, latestTagName, nil
+	head, err := g.repository.Head()
+	if err != nil {
+		return tags, fmt.Errorf("can't get HEAD object: %w", err)
+	}
+
+	commitHead, err := g.repository.CommitObject(head.Hash())
+	if err != nil {
+		return tags, fmt.Errorf("can't get HEAD commits: %w", err)
+	}
+
+	iter := object.NewCommitIterCTime(commitHead, make(map[plumbing.Hash]bool), []plumbing.Hash{})
+	err = iter.ForEach(func(c *object.Commit) error {
+		tag, ok := tagsHash[c.ID()]
+		if ok {
+			tags = append(tags, tag...)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return tags, fmt.Errorf("can't parse commits: %w", err)
+	}
+
+	return tags, nil
 }
 
 func (g *Git) CreateTag(version string) error {
 	head, err := g.repository.Head()
 	if err != nil {
-		return err
+		return fmt.Errorf("can't get HEAD object: %w", err)
 	}
 
-	_, err = g.repository.CreateTag(version, head.Hash(), nil)
-	return err
+	if _, err := g.repository.CreateTag(version, head.Hash(), nil); err != nil {
+		return fmt.Errorf("can't create tag: %w", err)
+	}
 
+	return nil
 }

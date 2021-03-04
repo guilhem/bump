@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/guilhem/bump/pkg/git"
@@ -24,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// minorCmd represents the minor command
+// minorCmd represents the minor command.
 var minorCmd = &cobra.Command{
 	Use:   "minor",
 	Short: "Bump minor",
@@ -32,7 +31,7 @@ var minorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		version := semver.New(currentTag)
 		vInc := version.IncMinor()
-		fmt.Println(vInc.Original())
+		log.Println(vInc.Original())
 		if !dryRun {
 			g, err := git.New()
 			if err != nil {
