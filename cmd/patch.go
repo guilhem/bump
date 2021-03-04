@@ -16,16 +16,14 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"log"
-
-	"github.com/spf13/cobra"
 
 	"github.com/guilhem/bump/pkg/git"
 	"github.com/guilhem/bump/pkg/semver"
+	"github.com/spf13/cobra"
 )
 
-// patchCmd represents the patch command
+// patchCmd represents the patch command.
 var patchCmd = &cobra.Command{
 	Use:   "patch",
 	Short: "Bump patch",
@@ -33,7 +31,7 @@ var patchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		version := semver.New(currentTag)
 		versionInc := version.IncPatch()
-		fmt.Println(versionInc.Original())
+		log.Println(versionInc.Original())
 		if !dryRun {
 			g, err := git.New()
 			if err != nil {

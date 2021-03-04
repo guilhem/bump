@@ -1,6 +1,8 @@
 package semver
 
 import (
+	"fmt"
+
 	"github.com/Masterminds/semver"
 )
 
@@ -12,10 +14,11 @@ func New(v string) *bump {
 
 func Latest(tags []string) (string, error) {
 	vs := make([]*semver.Version, len(tags))
+
 	for i, r := range tags {
 		v, err := semver.NewVersion(r)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("can't parse tag %s semver: %w", r, err)
 		}
 
 		vs[i] = v
