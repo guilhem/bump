@@ -16,12 +16,15 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
-	"os"
+	"context"
+	"errors"
 
+	"github.com/bombsimon/logrusr/v2"
+	"github.com/go-logr/logr"
 	"github.com/guilhem/bump/pkg/git"
 	"github.com/guilhem/bump/pkg/semver"
 	"github.com/manifoldco/promptui"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -37,13 +40,27 @@ var rootCmd = &cobra.Command{
 	Short: "Bump version",
 	Long:  ``,
 
+	SilenceUsage: true,
+
 	PersistentPreRun: preRun,
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		log.Println(err)
-		os.Exit(1)
+	logrusLog := logrus.New()
+	log := logrusr.New(logrusLog)
+
+	ctx := logr.NewContext(context.Background(), log)
+
+	g, err := git.New()
+	if err != nil {
+		log.Error(err, "git new")
+		return
+	}
+
+	ctx = context.WithValue(ctx, "git", g)
+
+	if err := rootCmd.ExecuteContext(ctx); err != nil {
+		log.Error(err, "ExecuteContext")
 	}
 }
 
@@ -56,24 +73,31 @@ func init() {
 }
 
 func preRun(cmd *cobra.Command, args []string) {
-	g, err := git.New()
+	ctx := cmd.Context()
+	log, err := logr.FromContext(ctx)
 	if err != nil {
-		log.Fatalf("not a git repository")
+		cmd.PrintErrf("error getting log: %v\n", err)
+		return
 	}
+
+	g := ctx.Value("git").(*git.Git)
 
 	if !allowDirty {
 		if g.IsDirty() {
-			log.Fatalf("is dirty")
+			log.Error(errors.New("is dirty"), "test dirty")
+			return
 		}
 	}
 
 	tags, err := g.Tags()
+	if err != nil {
+		log.Error(err, "get tags")
+		return
+	}
+
+	log = log.WithValues("tags", tags)
 
 	if !latestTag {
-		if err != nil {
-			log.Fatalf("error tags: %s", err)
-		}
-
 		prompt := promptui.Select{
 			Label: "Select Previous tag",
 			Items: tags,
@@ -82,16 +106,17 @@ func preRun(cmd *cobra.Command, args []string) {
 		_, currentTag, err = prompt.Run()
 
 		if err != nil {
-			log.Printf("Prompt failed %v\n", err)
-
+			log.Error(err, "prompt run")
 			return
 		}
 
-		log.Printf("You choose %q\n", currentTag)
 	} else {
 		currentTag, err = semver.Latest(tags)
 		if err != nil {
-			log.Fatalf("Can't get latest tag: %s", err)
+			log.Error(err, "get latest tag")
+			return
 		}
 	}
+
+	log.Info("tag choosed", "current tag", currentTag)
 }
