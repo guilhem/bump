@@ -16,10 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
-
-	"github.com/guilhem/bump/pkg/git"
-	"github.com/guilhem/bump/pkg/semver"
 	"github.com/spf13/cobra"
 )
 
@@ -28,20 +24,7 @@ var majorCmd = &cobra.Command{
 	Use:   "major",
 	Short: "Bump major version",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		version := semver.New(currentTag)
-		vInc := version.IncMajor()
-		log.Println(vInc.Original())
-		if !dryRun {
-			g, err := git.New()
-			if err != nil {
-				log.Fatalf("not a git repository")
-			}
-			if err := g.CreateTag(vInc.Original()); err != nil {
-				log.Fatalf("fail to create tag: %s", err)
-			}
-		}
-	},
+	Run:   inc,
 }
 
 func init() {

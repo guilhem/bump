@@ -6,9 +6,9 @@ import (
 	"github.com/Masterminds/semver"
 )
 
-type bump = semver.Version
+type Bump = semver.Version
 
-func New(v string) *bump {
+func New(v string) *Bump {
 	return semver.MustParse(v)
 }
 
