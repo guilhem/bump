@@ -16,12 +16,10 @@ jobs:
           go-version: 1.13
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Install snapcraft
-        run: sudo snap install snapcraft --classic
-      - name: Add snapcraft to PATH
-        run: sudo ln -fs /snap/bin/snapcraft /usr/local/bin/snapcraft
-      - name: Snapcraft login
-        run: snapcraft login --with ${{ secrets.SNAPCRAFT_TOKEN }}
+      - name: Snapcraft Action
+        uses: samuelmeuli/action-snapcraft@v1.2.0
+        with:
+          snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v1
         with:
