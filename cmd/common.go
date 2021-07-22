@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func inc(cmd *cobra.Command, args []string) {
+func inc(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 
 	log, err := logr.FromContext(ctx)
 	if err != nil {
 		cmd.PrintErrf("error getting log: %v\n", err)
-		return
+		return err
 	}
 
 	log = log.WithName(cmd.CommandPath())
@@ -24,29 +24,30 @@ func inc(cmd *cobra.Command, args []string) {
 
 	version := semver.New(currentTag)
 
-	var vInc semver.Bump
-
 	switch cmd.CommandPath() {
 	case "bump patch":
-		vInc = version.IncPatch()
+		version.IncPatch()
 	case "bump minor":
-		vInc = version.IncMinor()
+		version.IncMinor()
 	case "bump major":
-		vInc = version.IncMajor()
+		version.IncMajor()
 	default:
 		log.Error(errors.New("command not matched"), "increment", "commandPath", cmd.CommandPath())
-		return
+		return err
 	}
 
-	log = log.WithValues("Original", vInc.Original())
+	log = log.WithValues("New  Tag", version.StringFull())
 
 	log.Info("values")
 
 	if !dryRun {
 		g := ctx.Value("git").(*git.Git)
 
-		if err := g.CreateTag(vInc.Original()); err != nil {
+		if err := g.CreateTag(version.StringFull()); err != nil {
 			log.Error(err, "Create Tag")
+			return err
 		}
 	}
+
+	return nil
 }

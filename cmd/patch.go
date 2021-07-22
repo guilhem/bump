@@ -24,7 +24,7 @@ var patchCmd = &cobra.Command{
 	Use:   "patch",
 	Short: "Bump patch",
 	Long:  ``,
-	Run:   inc,
+	RunE:  inc,
 }
 
 func init() {

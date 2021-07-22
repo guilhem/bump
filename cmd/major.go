@@ -24,7 +24,7 @@ var majorCmd = &cobra.Command{
 	Use:   "major",
 	Short: "Bump major version",
 	Long:  ``,
-	Run:   inc,
+	RunE:  inc,
 }
 
 func init() {

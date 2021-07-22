@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/bombsimon/logrusr/v2"
 	"github.com/go-logr/logr"
@@ -42,7 +43,7 @@ var rootCmd = &cobra.Command{
 
 	SilenceUsage: true,
 
-	PersistentPreRun: preRun,
+	PersistentPreRunE: preRun,
 }
 
 func Execute() {
@@ -54,7 +55,7 @@ func Execute() {
 	g, err := git.New()
 	if err != nil {
 		log.Error(err, "git new")
-		return
+		os.Exit(1)
 	}
 
 	ctx = context.WithValue(ctx, "git", g)
@@ -72,27 +73,28 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Don't touch git repository")
 }
 
-func preRun(cmd *cobra.Command, args []string) {
+func preRun(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	log, err := logr.FromContext(ctx)
 	if err != nil {
 		cmd.PrintErrf("error getting log: %v\n", err)
-		return
+		return err
 	}
 
 	g := ctx.Value("git").(*git.Git)
 
 	if !allowDirty {
 		if g.IsDirty() {
-			log.Error(errors.New("is dirty"), "test dirty")
-			return
+			err := errors.New("is dirty")
+			log.Error(err, "test dirty")
+			return err
 		}
 	}
 
 	tags, err := g.Tags()
 	if err != nil {
 		log.Error(err, "get tags")
-		return
+		return err
 	}
 
 	log = log.WithValues("tags", tags)
@@ -107,16 +109,18 @@ func preRun(cmd *cobra.Command, args []string) {
 
 		if err != nil {
 			log.Error(err, "prompt run")
-			return
+			return err
 		}
 
 	} else {
 		currentTag, err = semver.Latest(tags)
 		if err != nil {
 			log.Error(err, "get latest tag")
-			return
+			return err
 		}
 	}
 
 	log.Info("tag choosed", "current tag", currentTag)
+
+	return nil
 }

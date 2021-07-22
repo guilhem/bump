@@ -24,7 +24,7 @@ var minorCmd = &cobra.Command{
 	Use:   "minor",
 	Short: "Bump minor",
 	Long:  ``,
-	Run:   inc,
+	RunE:  inc,
 }
 
 func init() {
