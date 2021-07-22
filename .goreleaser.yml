@@ -36,7 +36,7 @@ snapcrafts:
     plugs:
       home:
 brews:
-  - github:
+  - tap:
       owner: guilhem
       name: homebrew-tap
     commit_author:
@@ -44,3 +44,4 @@ brews:
       email: goreleaser@barpilot.io
     homepage: "https://github.com/guilhem/bump"
     description: "Command-line to bump version in a git repository."
+release:
