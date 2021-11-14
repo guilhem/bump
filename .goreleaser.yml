@@ -37,6 +37,7 @@ brews:
   - tap:
       owner: guilhem
       name: homebrew-tap
+      token: "{{ .Env.TAP_TOKEN }}"
     commit_author:
       name: goreleaserbot
       email: goreleaser@barpilot.io
