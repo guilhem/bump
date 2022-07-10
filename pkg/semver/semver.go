@@ -46,15 +46,15 @@ func (b *Bump) IncPatch() {
 }
 
 func Latest(tags []string) (string, error) {
-	vs := make(semver.Collection, len(tags))
+	vs := make(semver.Collection, 0, len(tags))
 
-	for i, r := range tags {
+	for _, r := range tags {
 		v, err := semver.NewVersion(r)
 		if err != nil {
 			continue
 		}
 
-		vs[i] = v
+		vs = append(vs, v)
 	}
 
 	latest := vs[0]
