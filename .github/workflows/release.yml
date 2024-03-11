@@ -9,6 +9,8 @@ jobs:
   release:
     name: Goreleaser
     runs-on: ubuntu-latest
+    env:
+      SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
     steps:
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -17,10 +19,11 @@ jobs:
           check-latest: true
       - name: Checkout
         uses: actions/checkout@v1
+
+      # snapcraft export-login --snaps bump -
       - name: Snapcraft Action
-        uses: samuelmeuli/action-snapcraft@v1.2.0
-        with:
-          snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN }}
+        uses: samuelmeuli/action-snapcraft@v2
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
