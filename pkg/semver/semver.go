@@ -1,6 +1,7 @@
 package semver
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
@@ -46,6 +47,10 @@ func (b *Bump) IncPatch() {
 }
 
 func Latest(tags []string) (string, error) {
+	if len(tags) == 0 {
+		return "", errors.New("no tags")
+	}
+
 	vs := make(semver.Collection, 0, len(tags))
 
 	for _, r := range tags {
