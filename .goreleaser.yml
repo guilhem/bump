@@ -32,8 +32,13 @@ snapcrafts:
     license: Apache-2.0
     base: core18
     confinement: strict
+    apps:
+      bump:
+        plugs: ["home", "personal-files"]
     plugs:
-      home:
+      personal-files:
+        read:
+        - $HOME/.gitconfig
 brews:
   - repository:
       owner: guilhem
