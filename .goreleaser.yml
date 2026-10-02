@@ -1,5 +1,8 @@
+version: 2
 builds:
 - binary: bump
+  env:
+    - CGO_ENABLED=0
 archives:
 - name_template: >-
     {{- .ProjectName }}_
@@ -11,7 +14,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
@@ -30,7 +33,7 @@ snapcrafts:
     grade: stable
     publish: true
     license: Apache-2.0
-    base: core18
+    base: core24
     confinement: strict
     plugs:
       home:

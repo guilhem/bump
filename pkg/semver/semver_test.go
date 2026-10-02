@@ -34,6 +34,16 @@ func TestLatest(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "no semantic version tags",
+			args:    args{tags: []string{"release", "nightly"}},
+			wantErr: true,
+		},
+		{
+			name: "ignore non-version tags",
+			args: args{tags: []string{"nightly", "v1.2.3", "release", "v1.3.0"}},
+			want: "v1.3.0",
+		},
+		{
 			name: "empty",
 			args: args{
 				tags: []string{},

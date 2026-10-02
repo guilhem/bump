@@ -62,6 +62,10 @@ func Latest(tags []string) (string, error) {
 		vs = append(vs, v)
 	}
 
+	if len(vs) == 0 {
+		return "", errors.New("no semantic version tags")
+	}
+
 	latest := vs[0]
 
 	for _, t := range vs {
