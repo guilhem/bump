@@ -42,8 +42,6 @@ var rootCmd = &cobra.Command{
 	Long:  ``,
 
 	SilenceUsage: true,
-
-	PersistentPreRunE: preRun,
 }
 
 func Execute() {

@@ -10,6 +10,9 @@ import (
 )
 
 func inc(cmd *cobra.Command, args []string) error {
+	if err := preRun(cmd, args); err != nil {
+		return err
+	}
 	ctx := cmd.Context()
 
 	log, err := logr.FromContext(ctx)

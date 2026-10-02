@@ -7,6 +7,10 @@ trap 'rm -rf "$fixture"' EXIT HUP INT TERM
 go build -o "$fixture/bump" .
 cd "$fixture"
 ./bump --help >/dev/null
+./bump completion bash >"$fixture/completion"
+test -s "$fixture/completion"
+./bump __complete ma >"$fixture/completed"
+grep -q '^major' "$fixture/completed"
 git init -q repo
 cd repo
 git -c user.name=Test -c user.email=test@example.com -c commit.gpgsign=false commit -q --allow-empty -m initial
@@ -40,4 +44,4 @@ git tag -d v1.2.3 v1.3.0-rc.1 v1.3.0 v1.4.0 >/dev/null
 git tag 2.0.0
 ../bump major
 git rev-parse --verify refs/tags/3.0.0 >/dev/null
-echo "CLI smoke passed: help, invalid tags, prerelease, dry-run, dirty worktree, tag prefixes"
+echo "CLI smoke passed: help, completion, invalid tags, prerelease, dry-run, dirty worktree, tag prefixes"
