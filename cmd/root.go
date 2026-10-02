@@ -52,16 +52,9 @@ func Execute() {
 
 	ctx := logr.NewContext(context.Background(), log)
 
-	g, err := git.New()
-	if err != nil {
-		log.Error(err, "git new")
-		os.Exit(1)
-	}
-
-	ctx = context.WithValue(ctx, "git", g)
-
 	if err := rootCmd.ExecuteContext(ctx); err != nil {
 		log.Error(err, "ExecuteContext")
+		os.Exit(1)
 	}
 }
 
@@ -81,7 +74,11 @@ func preRun(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	g := ctx.Value("git").(*git.Git)
+	g, err := git.New()
+	if err != nil {
+		return err
+	}
+	cmd.SetContext(context.WithValue(ctx, "git", g))
 
 	if !allowDirty {
 		if g.IsDirty() {
